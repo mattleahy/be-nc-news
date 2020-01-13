@@ -94,7 +94,7 @@ describe("formatDates", () => {
   });
 });
 
-describe.only("makeRefObj", () => {
+describe("makeRefObj", () => {
   it("should return an object", () => {
     const items = [];
     const actualResult = makeRefObj(items);
@@ -162,15 +162,102 @@ describe.only("makeRefObj", () => {
   });
 });
 
-describe.only("formatComments", () => {
+describe("formatComments", () => {
   it("returns an empty array when passed an empty array", () => {
     expect(formatComments([])).to.eql([]);
   });
-  it("should return an array of objects", () => {
+  it("returns an array of objects", () => {
     const comments = [{}];
-    const ref = {};
+    const articleRef = {};
     const actualResult = formatComments(comments, articleRef);
     expect(actualResult).to.be.an("array");
     expect(actualResult[0]).to.be.an("object");
+  });
+  it("does not mutate original array or ref object", () => {
+    const comments = [{}];
+    const articleRef = {};
+    const articleRefCopy = { ...articleRef };
+    const actualResult = formatComments(comments, articleRef);
+    expect(actualResult).to.not.equal(comments);
+    expect(articleRef).to.eql(articleRefCopy);
+  });
+  it("correctly formats one comment object", () => {
+    const input = [
+      {
+        body: "I hate streaming noses",
+        belongs_to: "Living in the shadow of a great man",
+        created_by: "icellusedkars",
+        votes: 0,
+        created_at: 1385210163389
+      }
+    ];
+    const articleRef = { "Living in the shadow of a great man": 1 };
+    const actual = formatComments(input, articleRef);
+    const expected = [
+      {
+        article_id: 1,
+        body: "I hate streaming noses",
+        author: "icellusedkars",
+        votes: 0,
+        created_at: new Date(1385210163389)
+      }
+    ];
+    expect(actual).to.eql(expected);
+  });
+  it("correctly formats multiple comments in array", () => {
+    const input = [
+      {
+        body: "I hate streaming noses",
+        belongs_to: "Living in the shadow of a great man",
+        created_by: "icellusedkars",
+        votes: 0,
+        created_at: 1385210163389
+      },
+      {
+        body: " I carry a log — yes. Is it funny to you? It is not to me.",
+        belongs_to: "Living in the shadow of a great man",
+        created_by: "icellusedkars",
+        votes: -100,
+        created_at: 1416746163389
+      },
+      {
+        body:
+          "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        belongs_to: "They're not exactly dogs, are they?",
+        created_by: "butter_bridge",
+        votes: 16,
+        created_at: 1511354163389
+      }
+    ];
+    const articleRef = {
+      "Living in the shadow of a great man": 1,
+      "They're not exactly dogs, are they?": 2
+    };
+    const actual = formatComments(input, articleRef);
+    const expected = [
+      {
+        body: "I hate streaming noses",
+        article_id: 1,
+        author: "icellusedkars",
+        votes: 0,
+        created_at: new Date(1385210163389)
+      },
+      {
+        body: " I carry a log — yes. Is it funny to you? It is not to me.",
+        article_id: 1,
+        author: "icellusedkars",
+        votes: -100,
+        created_at: new Date(1416746163389)
+      },
+      {
+        body:
+          "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        article_id: 2,
+        author: "butter_bridge",
+        votes: 16,
+        created_at: new Date(1511354163389)
+      }
+    ];
+    expect(actual).to.eql(expected);
   });
 });
