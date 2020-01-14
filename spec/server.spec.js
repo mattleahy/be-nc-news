@@ -12,7 +12,19 @@ const server = require("../server");
 describe("/api", () => {
   beforeEach(() => connection.seed.run());
   after(() => connection.destroy());
-  describe("GET", () => {
-    it("", () => {});
+  describe.only("/topics", () => {
+    describe("GET", () => {
+      it("GET: 200 responds with an array of topic objects, which has slug and description properties", () => {
+        return request(server)
+          .get("/api/topics")
+          .expect(200)
+          .then(topics => {
+            expect(topics.body).to.have.keys("topics");
+            topics.body.topics.forEach(topic => {
+              expect(topic).to.have.keys(["slug", "description"]);
+            });
+          });
+      });
+    });
   });
 });
