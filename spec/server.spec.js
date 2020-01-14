@@ -74,8 +74,46 @@ describe.only("/SERVER", () => {
 
     describe("/articles/:article_id", () => {
       describe("GET", () => {
-        it("", () => {});
+        it("status 200: responds with an article object, which should have the following properties: author, title, article_id, body, topic, created_at, votes", () => {
+          return request(server)
+            .get("/api/articles/1")
+            .expect(200)
+            .then(response => {
+              const expectedResult = {
+                article_id: 1,
+                title: "Living in the shadow of a great man",
+                body: "I find this existence challenging",
+                votes: 100,
+                author: "butter_bridge",
+                created_at: "2018-11-15T12:21:54.171Z",
+                topic: "mitch"
+              };
+              expect(response.body).to.be.an("object");
+              expect(response.body.article).eql(expectedResult);
+            });
+        });
+        it("Error status 404: returns an error when valid article_id does not exist in database", () => {
+          return request(server)
+            .get("/api/articles/12765")
+            .expect(404)
+            .then(err => {
+              expect(err.body.msg).to.equal("Article Does Not Exist");
+            });
+        });
+        it("Error status 400 sends an appropriate error message when given an invalid id", () => {
+          return request(server)
+            .get("/api/articles/not-a-valid-id")
+            .expect(400)
+            .then(response => {
+              expect(response.body.msg).to.equal("Invalid Id");
+            });
+        });
       });
+      // describe('PATCH', () => {
+      //   it('', () => {
+
+      //   });
+      // });
     });
   });
 });
