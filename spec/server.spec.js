@@ -74,7 +74,7 @@ describe.only("/SERVER", () => {
 
     describe("/articles/:article_id", () => {
       describe("GET", () => {
-        it("status 200: responds with an article object, which should have the following properties: author, title, article_id, body, topic, created_at, votes", () => {
+        it("status 200: responds with an article object, which should have the following properties: author, title, article_id, body, topic, created_at, votes, and comment_count", () => {
           return request(server)
             .get("/api/articles/1")
             .expect(200)
@@ -86,7 +86,8 @@ describe.only("/SERVER", () => {
                 votes: 100,
                 author: "butter_bridge",
                 created_at: "2018-11-15T12:21:54.171Z",
-                topic: "mitch"
+                topic: "mitch",
+                comment_count: "13"
               };
               expect(response.body).to.be.an("object");
               expect(response.body.article).eql(expectedResult);
@@ -109,11 +110,27 @@ describe.only("/SERVER", () => {
             });
         });
       });
-      // describe('PATCH', () => {
-      //   it('', () => {
-
-      //   });
-      // });
+      describe("PATCH", () => {
+        it("status: 200 responds with the updated article when passed a valid inc_votes object", () => {
+          return request(server)
+            .patch("/api/articles/1")
+            .send({ inc_votes: 10 })
+            .expect(200)
+            .then(response => {
+              const expectedResult = {
+                article_id: 1,
+                title: "Living in the shadow of a great man",
+                body: "I find this existence challenging",
+                votes: 110,
+                author: "butter_bridge",
+                created_at: "2018-11-15T12:21:54.171Z",
+                topic: "mitch"
+              };
+              expect(response.body.article).to.be.an("object");
+              expect(response.body.article).to.eql(expectedResult);
+            });
+        });
+      });
     });
   });
 });
