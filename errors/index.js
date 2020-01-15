@@ -4,7 +4,7 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handlePsqlErrors = (err, req, res, next) => {
-  const psqlErr = { "22P02": [400, "Invalid Id"] };
+  const psqlErr = { "22P02": [400, "Invalid Value"] };
   if (Object.keys(psqlErr).includes(err.code)) {
     res.status(psqlErr[err.code][0]).send({ msg: psqlErr[err.code][1] });
   } else next(err);

@@ -22,8 +22,8 @@ describe.only("/SERVER", () => {
       return request(server)
         .get("/api/not-a-route")
         .expect(404)
-        .then(response => {
-          expect(response.body.msg).to.equal("Route Not Found");
+        .then(err => {
+          expect(err.body.msg).to.equal("Route Not Found");
         });
     });
     describe("/topics", () => {
@@ -105,13 +105,13 @@ describe.only("/SERVER", () => {
           return request(server)
             .get("/api/articles/not-a-valid-id")
             .expect(400)
-            .then(response => {
-              expect(response.body.msg).to.equal("Invalid Id");
+            .then(err => {
+              expect(err.body.msg).to.equal("Invalid Value");
             });
         });
       });
       describe("PATCH", () => {
-        it("status: 200 responds with the updated article when passed a valid inc_votes object", () => {
+        it("status: 200 responds with the updated article with votes incremented when passed a valid inc_votes object", () => {
           return request(server)
             .patch("/api/articles/1")
             .send({ inc_votes: 10 })
@@ -126,8 +126,62 @@ describe.only("/SERVER", () => {
                 created_at: "2018-11-15T12:21:54.171Z",
                 topic: "mitch"
               };
-              expect(response.body.article).to.be.an("object");
-              expect(response.body.article).to.eql(expectedResult);
+              expect(response.body.updatedArticle).to.be.an("object");
+              expect(response.body.updatedArticle).to.eql(expectedResult);
+            });
+        });
+        it("status: 200 responds with the updated article with votes decremented when passed a valid inc_votes object", () => {
+          return request(server)
+            .patch("/api/articles/1")
+            .send({ inc_votes: -1 })
+            .expect(200)
+            .then(response => {
+              expect(response.body.updatedArticle.votes).to.equal(99);
+            });
+        });
+        it("status: 200 responds with the updated article with votes decremented below 0, when passed a valid inc_votes object", () => {
+          return request(server)
+            .patch("/api/articles/1")
+            .send({ inc_votes: -101 })
+            .expect(200)
+            .then(response => {
+              expect(response.body.updatedArticle.votes).to.equal(-1);
+            });
+        });
+        it("status: 200 responds with the original article when not passed inc_votes object", () => {
+          return request(server)
+            .patch("/api/articles/1")
+            .send()
+            .expect(200)
+            .then(response => {
+              expect(response.body.updatedArticle.votes).to.equal(100);
+            });
+        });
+        it("Error status: 400 response with invalid inc_votes entry", () => {
+          return request(server)
+            .patch("/api/articles/1")
+            .send({ inc_votes: "ten" })
+            .expect(400)
+            .then(err => {
+              expect(err.body.msg).to.equal("Invalid Value");
+            });
+        });
+        it("status: 200 when there is an additional invalid inc_votes entry", () => {
+          return request(server)
+            .patch("/api/articles/1")
+            .send({ inc_votes: "ten", invalid: "entry" })
+            .expect(400)
+            .then(err => {
+              expect(err.body.msg).to.equal("Invalid Value");
+            });
+        });
+        it("Error status: 404 when article is not present ", () => {
+          return request(server)
+            .patch("/api/articles/9090")
+            .send({ inc_votes: 1 })
+            .expect(404)
+            .then(err => {
+              expect(err.body.msg).to.equal("Article Does Not Exist");
             });
         });
       });

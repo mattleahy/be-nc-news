@@ -17,4 +17,17 @@ const selectArticleById = article_id => {
     });
 };
 
-module.exports = selectArticleById;
+const updateArticleById = (article_id, inc_votes = 0) => {
+  return connection
+    .increment("votes", inc_votes)
+    .from("articles")
+    .where("article_id", article_id)
+    .returning("*")
+    .then(([article]) => {
+      if (!article)
+        return Promise.reject({ status: 404, msg: "Article Does Not Exist" });
+      else return article;
+    });
+};
+
+module.exports = { selectArticleById, updateArticleById };
