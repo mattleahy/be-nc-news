@@ -7,7 +7,8 @@ exports.handlePsqlErrors = (err, req, res, next) => {
   const psqlErr = {
     "22P02": [400, "Invalid Value"],
     "23503": [404, "Target path does not exist"],
-    "23502": [400, "Key data not input"]
+    "23502": [400, "Key data not input"],
+    "42703": [400, "Bad request"]
   };
   if (Object.keys(psqlErr).includes(err.code)) {
     res.status(psqlErr[err.code][0]).send({ msg: psqlErr[err.code][1] });

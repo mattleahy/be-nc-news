@@ -34,5 +34,10 @@ exports.postCommentByArticleId = (req, res, next) => {
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
-  selectCommentsByArticleId();
+  const { sort_by, order } = req.query;
+  selectCommentsByArticleId(req.params.article_id, sort_by, order)
+    .then(returnedComments => {
+      res.status(200).send(returnedComments);
+    })
+    .catch(next);
 };

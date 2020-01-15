@@ -48,7 +48,35 @@ const insertCommentByArticleId = (article_id, comment) => {
     });
 };
 
-const selectCommentsByArticleId = () => {};
+const selectCommentsByArticleId = (
+  article_id,
+  sort_by = "created_at",
+  order = "desc"
+) => {
+  return connection
+    .select("comment_id", "votes", "created_at", "author", "body")
+    .from("comments")
+    .where("article_id", "=", article_id)
+    .orderBy(sort_by, order)
+    .then(comments => {
+      if (!comments.length) {
+        return connection
+          .select("*")
+          .from("articles")
+          .where("article_id", "=", article_id)
+          .then(article => {
+            // if article exists but has no comments
+            if (article.length) {
+              return { comments: [] };
+            }
+            // else if article does not exist
+            else {
+              return Promise.reject({ status: 404, msg: "Article Not Found" });
+            }
+          });
+      } else return { comments: comments };
+    });
+};
 
 module.exports = {
   selectArticleById,

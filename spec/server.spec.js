@@ -231,7 +231,7 @@ describe.only("/SERVER", () => {
         it("Error status: 400 response when no username is passed", () => {
           return request(server)
             .post("/api/articles/2/comments")
-            .send({ body: "wooppeeeeee" })
+            .send({ body: "This is my comment!" })
             .expect(400)
             .then(response => {
               const { msg } = response.body;
@@ -247,7 +247,7 @@ describe.only("/SERVER", () => {
               expect(err.body.msg).to.equal("Invalid post request");
             });
         });
-        it("400 - when article does not exist", () => {
+        it("Error status: 404 response when article does not exist", () => {
           return request(server)
             .post("/api/articles/19000/comments")
             .send({
@@ -255,13 +255,83 @@ describe.only("/SERVER", () => {
               body: "Fantastico!"
             })
             .expect(404)
-            .then(response => {
-              const { msg } = response.body;
-              expect(response.body.msg).to.equal("Target path does not exist");
+            .then(err => {
+              expect(err.body.msg).to.equal("Target path does not exist");
             });
         });
       });
-      describe("GET", () => {});
+      describe.only("GET", () => {
+        it("status 200: responds with an array of comments for a given article_id, which has the properties: comment_id, body, created_at, votes, and author", () => {
+          return request(server)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(response => {
+              expect(response.body.comments).to.be.an("array");
+              expect(response.body.comments[0]).to.include.keys(
+                "comment_id",
+                "votes",
+                "created_at",
+                "author",
+                "body"
+              );
+              response.body.comments.forEach(comment => {
+                expect(comment).to.be.an("object");
+              });
+            });
+        });
+        it("status 200: responds with default sort_by and order when no queries are passed", () => {
+          return request(server)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(response => {
+              expect(response.body.comments).to.be.an("array");
+              expect(response.body.comments).to.be.descendingBy("created_at");
+            });
+        });
+        it("status 200: accepts sort_by queries for columns and responds with comments correctly sorted", () => {
+          return request(server)
+            .get("/api/articles/1/comments?sort_by=author")
+            .expect(200)
+            .then(response => {
+              expect(response.body.comments).to.be.an("array");
+              expect(response.body.comments).to.be.descendingBy("author");
+            });
+        });
+        it("status 200: accepts sort_by and order queries for columns and responds with comments correctly sorted", () => {
+          return request(server)
+            .get("/api/articles/1/comments?sort_by=author&order=asc")
+            .expect(200)
+            .then(response => {
+              expect(response.body.comments).to.be.an("array");
+              expect(response.body.comments).to.be.ascendingBy("author");
+            });
+        });
+        it("status 200: responds with an empty array when passed an article with no comments", () => {
+          return request(server)
+            .get("/api/articles/2/comments")
+            .expect(200)
+            .then(response => {
+              expect(response.body.comments).to.be.an("array");
+              expect(response.body.comments).to.have.lengthOf(0);
+            });
+        });
+        it("Error status: 404 response when article does not exist", () => {
+          return request(server)
+            .get("/api/articles/19000/comments")
+            .expect(404)
+            .then(err => {
+              expect(err.body.msg).to.eql("Article Not Found");
+            });
+        });
+        it("Error status: 400 response when an invalid sort_by value passed to /api/articles/1/comments", () => {
+          return request(server)
+            .get("/api/articles/1/comments?sort_by=not-a-column")
+            .expect(400)
+            .then(err => {
+              expect(err.body.msg).to.eql("Bad request");
+            });
+        });
+      });
     });
   });
 });
