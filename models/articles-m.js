@@ -30,4 +30,29 @@ const updateArticleById = (article_id, inc_votes = 0) => {
     });
 };
 
-module.exports = { selectArticleById, updateArticleById };
+const insertCommentByArticleId = (article_id, comment) => {
+  if (comment.body === "" || !comment.body) {
+    return Promise.reject({ status: 400, msg: "Invalid post request" });
+  }
+  const commentToInsert = {
+    author: comment.username,
+    article_id: article_id,
+    body: comment.body
+  };
+  return connection
+    .returning("*")
+    .insert(commentToInsert)
+    .into("comments")
+    .then(([comment]) => {
+      return comment;
+    });
+};
+
+const selectCommentsByArticleId = () => {};
+
+module.exports = {
+  selectArticleById,
+  updateArticleById,
+  insertCommentByArticleId,
+  selectCommentsByArticleId
+};

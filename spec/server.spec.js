@@ -196,8 +196,72 @@ describe.only("/SERVER", () => {
     });
     describe("/articles/:article_id/comments", () => {
       describe("POST", () => {
-        it("status: 201 accepts an object with properties username and body,and responds with posted comment", () => {});
+        it("status: 201 accepts an object with properties username and body,and responds with posted comment", () => {
+          return request(server)
+            .post("/api/articles/2/comments")
+            .send({
+              username: "icellusedkars",
+              body: "This is a great article!"
+            })
+            .expect(201)
+            .then(response => {
+              const { comment } = response.body;
+              expect(comment).to.have.keys(
+                "body",
+                "article_id",
+                "author",
+                "comment_id",
+                "created_at",
+                "votes"
+              );
+            });
+        });
+        it("Error status: 404 response when user/username does not exist", () => {
+          return request(server)
+            .post("/api/articles/2/comments")
+            .send({
+              username: "MrMatthew",
+              body: "No account for this username!"
+            })
+            .expect(404)
+            .then(err => {
+              expect(err.body.msg).to.equal("Target path does not exist");
+            });
+        });
+        it("Error status: 400 response when no username is passed", () => {
+          return request(server)
+            .post("/api/articles/2/comments")
+            .send({ body: "wooppeeeeee" })
+            .expect(400)
+            .then(response => {
+              const { msg } = response.body;
+              expect(msg).to.equal("Key data not input");
+            });
+        });
+        it("Error status: 400 response when post contains no content", () => {
+          return request(server)
+            .post("/api/articles/2/comments")
+            .send({ username: "icellusedkars", body: "" })
+            .expect(400)
+            .then(err => {
+              expect(err.body.msg).to.equal("Invalid post request");
+            });
+        });
+        it("400 - when article does not exist", () => {
+          return request(server)
+            .post("/api/articles/19000/comments")
+            .send({
+              username: "icellusedkars",
+              body: "Fantastico!"
+            })
+            .expect(404)
+            .then(response => {
+              const { msg } = response.body;
+              expect(response.body.msg).to.equal("Target path does not exist");
+            });
+        });
       });
+      describe("GET", () => {});
     });
   });
 });
