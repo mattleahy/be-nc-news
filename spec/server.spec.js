@@ -157,19 +157,27 @@ describe.only("/SERVER", () => {
               expect(response.body.updatedArticle.votes).to.equal(100);
             });
         });
+        it("status: 200 and doesn't add keys when there is an additional invalid key entry", () => {
+          return request(server)
+            .patch("/api/articles/1")
+            .send({ inc_votes: 10, invalid: "entry" })
+            .expect(200)
+            .then(response => {
+              expect(response.body.updatedArticle).to.have.keys([
+                "article_id",
+                "title",
+                "body",
+                "votes",
+                "topic",
+                "author",
+                "created_at"
+              ]);
+            });
+        });
         it("Error status: 400 response with invalid inc_votes entry", () => {
           return request(server)
             .patch("/api/articles/1")
             .send({ inc_votes: "ten" })
-            .expect(400)
-            .then(err => {
-              expect(err.body.msg).to.equal("Invalid Value");
-            });
-        });
-        it("status: 200 when there is an additional invalid inc_votes entry", () => {
-          return request(server)
-            .patch("/api/articles/1")
-            .send({ inc_votes: "ten", invalid: "entry" })
             .expect(400)
             .then(err => {
               expect(err.body.msg).to.equal("Invalid Value");
@@ -184,6 +192,11 @@ describe.only("/SERVER", () => {
               expect(err.body.msg).to.equal("Article Does Not Exist");
             });
         });
+      });
+    });
+    describe("/articles/:article_id/comments", () => {
+      describe("POST", () => {
+        it("status: 201 accepts an object with properties username and body,and responds with posted comment", () => {});
       });
     });
   });
