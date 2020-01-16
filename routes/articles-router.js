@@ -6,17 +6,23 @@ const {
   postCommentByArticleId,
   getCommentsByArticleId
 } = require("../controllers/articles-c");
+const { invalidMethod } = require("../errors/index");
 
-articlesRouter.route("/").get(getAllArticles);
+articlesRouter
+  .route("/")
+  .get(getAllArticles)
+  .all(invalidMethod);
 
 articlesRouter
   .route("/:article_id")
   .get(getArticleById)
-  .patch(patchArticleById);
+  .patch(patchArticleById)
+  .all(invalidMethod);
 
 articlesRouter
   .route("/:article_id/comments")
   .post(postCommentByArticleId)
-  .get(getCommentsByArticleId);
+  .get(getCommentsByArticleId)
+  .all(invalidMethod);
 
 module.exports = articlesRouter;

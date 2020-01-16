@@ -41,6 +41,20 @@ describe.only("/SERVER", () => {
             });
         });
       });
+      describe("INVALID METHODS", () => {
+        it("status:405", () => {
+          const invalidMethods = ["patch", "put", "post", "delete"];
+          const methodPromises = invalidMethods.map(method => {
+            return request(server)
+              [method]("/api/topics")
+              .expect(405)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal("method not allowed");
+              });
+          });
+          return Promise.all(methodPromises);
+        });
+      });
     });
     // USERS
     describe("USERS", () => {
@@ -52,14 +66,12 @@ describe.only("/SERVER", () => {
               .expect(200)
               .then(user => {
                 expect(user.body).to.eql({
-                  user: [
-                    {
-                      username: "butter_bridge",
-                      name: "jonny",
-                      avatar_url:
-                        "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
-                    }
-                  ]
+                  user: {
+                    username: "butter_bridge",
+                    name: "jonny",
+                    avatar_url:
+                      "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+                  }
                 });
               });
           });
@@ -196,6 +208,20 @@ describe.only("/SERVER", () => {
           });
         });
       });
+      describe("INVALID METHODS", () => {
+        it("status:405", () => {
+          const invalidMethods = ["patch", "put", "post", "delete"];
+          const methodPromises = invalidMethods.map(method => {
+            return request(server)
+              [method]("/api/articles")
+              .expect(405)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal("method not allowed");
+              });
+          });
+          return Promise.all(methodPromises);
+        });
+      });
 
       describe("/articles/:article_id", () => {
         describe("GET", () => {
@@ -235,7 +261,7 @@ describe.only("/SERVER", () => {
               });
           });
         });
-        describe("PATCH", () => {
+        describe.only("PATCH", () => {
           it("status: 200 responds with the updated article with votes incremented when passed a valid inc_votes object", () => {
             return request(server)
               .patch("/api/articles/1")
@@ -251,8 +277,8 @@ describe.only("/SERVER", () => {
                   created_at: "2018-11-15T12:21:54.171Z",
                   topic: "mitch"
                 };
-                expect(response.body.updatedArticle).to.be.an("object");
-                expect(response.body.updatedArticle).to.eql(expectedResult);
+                expect(response.body.article).to.be.an("object");
+                expect(response.body.article).to.eql(expectedResult);
               });
           });
           it("status: 200 responds with the updated article with votes decremented when passed a valid inc_votes object", () => {
@@ -261,7 +287,7 @@ describe.only("/SERVER", () => {
               .send({ inc_votes: -1 })
               .expect(200)
               .then(response => {
-                expect(response.body.updatedArticle.votes).to.equal(99);
+                expect(response.body.article.votes).to.equal(99);
               });
           });
           it("status: 200 responds with the updated article with votes decremented below 0, when passed a valid inc_votes object", () => {
@@ -270,7 +296,7 @@ describe.only("/SERVER", () => {
               .send({ inc_votes: -101 })
               .expect(200)
               .then(response => {
-                expect(response.body.updatedArticle.votes).to.equal(-1);
+                expect(response.body.article.votes).to.equal(-1);
               });
           });
           it("status: 200 responds with the original article when not passed inc_votes object", () => {
@@ -279,7 +305,7 @@ describe.only("/SERVER", () => {
               .send()
               .expect(200)
               .then(response => {
-                expect(response.body.updatedArticle.votes).to.equal(100);
+                expect(response.body.article.votes).to.equal(100);
               });
           });
           it("status: 200 and doesn't add keys when there is an additional invalid key entry", () => {
@@ -288,7 +314,7 @@ describe.only("/SERVER", () => {
               .send({ inc_votes: 10, invalid: "entry" })
               .expect(200)
               .then(response => {
-                expect(response.body.updatedArticle).to.have.keys([
+                expect(response.body.article).to.have.keys([
                   "article_id",
                   "title",
                   "body",
@@ -316,6 +342,20 @@ describe.only("/SERVER", () => {
               .then(err => {
                 expect(err.body.msg).to.equal("Article Does Not Exist");
               });
+          });
+        });
+        describe("INVALID METHODS", () => {
+          it("status:405", () => {
+            const invalidMethods = ["put", "post", "delete"];
+            const methodPromises = invalidMethods.map(method => {
+              return request(server)
+                [method]("/api/articles/1")
+                .expect(405)
+                .then(({ body: { msg } }) => {
+                  expect(msg).to.equal("method not allowed");
+                });
+            });
+            return Promise.all(methodPromises);
           });
         });
       });
@@ -458,6 +498,20 @@ describe.only("/SERVER", () => {
               });
           });
         });
+        describe("INVALID METHODS", () => {
+          it("status:405", () => {
+            const invalidMethods = ["patch", "put", "delete"];
+            const methodPromises = invalidMethods.map(method => {
+              return request(server)
+                [method]("/api/articles/1/comments")
+                .expect(405)
+                .then(({ body: { msg } }) => {
+                  expect(msg).to.equal("method not allowed");
+                });
+            });
+            return Promise.all(methodPromises);
+          });
+        });
       });
     });
     // COMMENTS
@@ -528,7 +582,7 @@ describe.only("/SERVER", () => {
         });
       });
       describe("/api/comments/:comment_id", () => {
-        describe.only("DELETE", () => {
+        describe("DELETE", () => {
           it("status: 204 response when deleting a comment, and returns no content", () => {
             return request(server)
               .delete("/api/comments/14")
@@ -543,13 +597,27 @@ describe.only("/SERVER", () => {
                 expect(comments).to.have.lengthOf(1);
               });
           });
-          it("Error status: 400 response whensent a delete request to an invalid comment ID", () => {
+          it("Error status: 400 response when sent a delete request to an invalid comment ID", () => {
             return request(server)
               .delete("/api/comments/not-a-comment")
               .expect(400)
               .then(response => {
                 expect(response.body.msg).to.equal("Invalid Value");
               });
+          });
+        });
+        describe("INVALID METHODS", () => {
+          it("status:405", () => {
+            const invalidMethods = ["get", "put", "post"];
+            const methodPromises = invalidMethods.map(method => {
+              return request(server)
+                [method]("/api/comments/1")
+                .expect(405)
+                .then(({ body: { msg } }) => {
+                  expect(msg).to.equal("method not allowed");
+                });
+            });
+            return Promise.all(methodPromises);
           });
         });
       });
