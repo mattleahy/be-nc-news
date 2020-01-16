@@ -1,9 +1,19 @@
 const {
+  selectAllArticles,
   selectArticleById,
   updateArticleById,
   insertCommentByArticleId,
   selectCommentsByArticleId
 } = require("../models/articles-m");
+
+exports.getAllArticles = (req, res, next) => {
+  const { sort_by, order, author, topic } = req.query;
+  selectAllArticles(sort_by, order, author, topic)
+    .then(articles => {
+      res.status(200).send({ articles });
+    })
+    .catch(next);
+};
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;

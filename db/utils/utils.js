@@ -25,3 +25,39 @@ exports.formatComments = (comments, articleRef) => {
     };
   });
 };
+
+exports.checkArticle = article_id => {
+  return connection
+    .select("*")
+    .from("articles")
+    .where("article_id", "=", article_id)
+    .then(articles => {
+      if (articles.length === 0) {
+        return Promise.reject({ status: 404, msg: "Article Not Found" });
+      } else return { comments: [] };
+    });
+};
+
+exports.checkAuthor = author => {
+  return connection
+    .select("*")
+    .from("users")
+    .where("username", "=", author)
+    .then(authors => {
+      if (authors.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not found" });
+      } else return [];
+    });
+};
+
+exports.checkTopic = topic => {
+  return connection
+    .select("*")
+    .from("topics")
+    .where("slug", "=", topic)
+    .then(topics => {
+      if (topics.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not found" });
+      } else return [];
+    });
+};

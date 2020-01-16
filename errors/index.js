@@ -4,6 +4,7 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handlePsqlErrors = (err, req, res, next) => {
+  // console.log(err);
   const psqlErr = {
     "22P02": [400, "Invalid Value"],
     "23503": [404, "Target path does not exist"],
@@ -16,6 +17,7 @@ exports.handlePsqlErrors = (err, req, res, next) => {
 };
 
 exports.handleServerErrors = (err, req, res, next) => {
+  // console.log(err);
   res.status(500).send({ msg: "Internal Server Error" });
 };
 
