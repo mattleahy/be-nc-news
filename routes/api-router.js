@@ -4,8 +4,12 @@ const usersRouter = require("./users-router");
 const commentsRouter = require("./comments-router");
 const articlesRouter = require("./articles-router");
 const { invalidMethod } = require("../errors/index");
+const { getApiJSON } = require("../controllers/api-c");
 
-apiRouter.route("/").all(invalidMethod);
+apiRouter
+  .route("/")
+  .get(getApiJSON)
+  .all(invalidMethod);
 
 apiRouter.use("/topics", topicsRouter);
 apiRouter.use("/users", usersRouter);

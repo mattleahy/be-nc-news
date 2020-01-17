@@ -28,7 +28,14 @@ describe.only("/SERVER", () => {
             expect(err.body.msg).to.equal("Route Not Found");
           });
       });
-      it("", () => {});
+      it("status: 200 response with a JSON describing all available endpoints on API", () => {
+        return request(server)
+          .get("/api")
+          .expect(200)
+          .then(response => {
+            expect(response.body).to.be.an("object");
+          });
+      });
     });
     describe("INVALID METHODS", () => {
       it("status:405", () => {
