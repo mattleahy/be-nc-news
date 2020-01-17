@@ -7,8 +7,8 @@ const {
 } = require("../models/articles-m");
 
 exports.getAllArticles = (req, res, next) => {
-  const { sort_by, order, author, topic } = req.query;
-  selectAllArticles(sort_by, order, author, topic)
+  const { sort_by, order, author, topic, page, limit } = req.query;
+  selectAllArticles(sort_by, order, author, topic, page, limit)
     .then(articles => {
       res.status(200).send({ articles });
     })
@@ -44,8 +44,8 @@ exports.postCommentByArticleId = (req, res, next) => {
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
-  const { sort_by, order } = req.query;
-  selectCommentsByArticleId(req.params.article_id, sort_by, order)
+  const { sort_by, order, limit, page } = req.query;
+  selectCommentsByArticleId(req.params.article_id, sort_by, order, limit, page)
     .then(returnedComments => {
       res.status(200).send(returnedComments);
     })

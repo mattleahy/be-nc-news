@@ -6,7 +6,9 @@ const selectAllArticles = (
   sort_by = "created_at",
   order = "desc",
   author,
-  topic
+  topic,
+  page = 1,
+  limit = 10
 ) => {
   return connection
     .select(
@@ -22,6 +24,8 @@ const selectAllArticles = (
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
     .orderBy(sort_by, order)
+    .limit(limit)
+    .offset(page * limit - limit)
     .modify(query => {
       if (author) query.where("articles.author", "=", author);
       if (topic) query.where("articles.topic", "=", topic);
@@ -88,13 +92,17 @@ const insertCommentByArticleId = (article_id, comment) => {
 const selectCommentsByArticleId = (
   article_id,
   sort_by = "created_at",
-  order = "desc"
+  order = "desc",
+  limit = 10,
+  page = 1
 ) => {
   return connection
     .select("comment_id", "votes", "created_at", "author", "body")
     .from("comments")
     .where("article_id", "=", article_id)
     .orderBy(sort_by, order)
+    .limit(limit)
+    .offset(page * limit - limit)
     .then(comments => {
       if (!comments.length) {
         return checkArticle(article_id);

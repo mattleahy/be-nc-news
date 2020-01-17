@@ -19,7 +19,7 @@ describe.only("/SERVER", () => {
 
   // API
   describe("/api", () => {
-    describe.only("GET", () => {
+    describe("GET", () => {
       it(" Error status: 404 response when a bad path is provided", () => {
         return request(server)
           .get("/api/not-a-route")
@@ -230,6 +230,22 @@ describe.only("/SERVER", () => {
             .expect(404)
             .then(err => {
               expect(err.body.msg).to.eql("Not found");
+            });
+        });
+        it("status: 200 response for a limit query of 5, returning 5 articles", () => {
+          return request(server)
+            .get("/api/articles?limit=5")
+            .expect(200)
+            .then(response => {
+              expect(response.body.articles.length).to.equal(5);
+            });
+        });
+        it("status: 200 response for a limit query and page number, returning the 5 articles from page 2", () => {
+          return request(server)
+            .get("/api/articles?limit=5&page=2")
+            .expect(200)
+            .then(response => {
+              expect(response.body.articles[0].title).to.equal("A");
             });
         });
       });
@@ -521,6 +537,22 @@ describe.only("/SERVER", () => {
             .expect(400)
             .then(err => {
               expect(err.body.msg).to.eql("Bad request");
+            });
+        });
+        it("status: 200 response for a limit query of 10, returning 10 comments", () => {
+          return request(server)
+            .get("/api/articles/1/comments?limit=5")
+            .expect(200)
+            .then(response => {
+              expect(response.body.comments.length).to.equal(5);
+            });
+        });
+        it("status: 200 response for a limit query and page number, returning the 5 comments from page 2", () => {
+          return request(server)
+            .get("/api/articles/1/comments?limit=5&page=2")
+            .expect(200)
+            .then(response => {
+              expect(response.body.comments[0].body).to.equal("Lobster pot");
             });
         });
       });
