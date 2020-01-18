@@ -65,7 +65,7 @@ npm run seed-dev
 npm start
 ```
 
-7. The server will now be able to respond, with an example of the data below.
+6. The server will now be able to respond, with an example of the data below.
 
 ```json
 // EXAMPLE RESPONSE:
