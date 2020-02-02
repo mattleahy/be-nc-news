@@ -11,4 +11,13 @@ const selectUserById = username => {
     });
 };
 
-module.exports = selectUserById;
+const selectAllUsers = () => {
+  return connection
+    .select("*")
+    .from("users")
+    .then(users => {
+      return users;
+    });
+};
+
+module.exports = { selectUserById, selectAllUsers };
