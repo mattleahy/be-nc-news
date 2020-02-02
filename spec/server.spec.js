@@ -111,6 +111,18 @@ describe.only("/SERVER", () => {
         });
       });
     });
+    describe("/users", () => {
+      describe("GET", () => {
+        it("returns array of all users", () => {
+          return request(server)
+            .get("/api/users")
+            .expect(200)
+            .then(response => {
+              expect(response.body.users).to.be.an("array");
+            });
+        });
+      });
+    });
   });
   // ARTICLES
   describe("Articles", () => {
