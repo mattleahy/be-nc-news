@@ -2,7 +2,7 @@
 
 NC News is a Node.js Express server using a RESTful API for an online news app.
 
-You can view an online version [here](https://matt-nc-news.herokuapp.com/)
+You can view an online version [here](https://matt-nc-news.herokuapp.com/api)
 
 ## Getting Started
 
